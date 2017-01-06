@@ -47,18 +47,26 @@ var hotp = {};
  *     counter - Counter value.  This should be stored by the application, must
  *         be user specific, and be incremented for each request.
  *
+ *     format - key string format.  Defaults to `utf8`. Possible values `hex`, `utf8`, `base64` 
+ *         or anything [Node Buffer](https://nodejs.org/api/buffer.html) supports.
+ *
+ *     variant - time variant ttop mode.  Defaults to `sha1`. Possible values `sha1`,
+ *         `sha256`, `sha512`.
+ *
  */
 hotp.gen = function(key, opt) {
 	key = key || '';
 	opt = opt || {};
 	var counter = opt.counter || 0;
+        var format = opt.format || 'utf8';
+        var variant = opt.variant || 'sha1';
 
 	var p = 6;
 
 	// Create the byte array
-	var b = new Buffer(intToBytes(counter));
+	var b = Buffer.from(intToBytes(counter));
 
-	var hmac = crypto.createHmac('sha1', new Buffer(key));
+	var hmac = crypto.createHmac(variant, Buffer.from(key, format));
 
 	// Update the HMAC with the byte array
 	var digest = hmac.update(b).digest('hex');
